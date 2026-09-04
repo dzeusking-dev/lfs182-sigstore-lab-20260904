@@ -69,7 +69,6 @@ jobs:
           cosign verify \
             --certificate-identity "$EXPECTED_IDENTITY" \
             --certificate-oidc-issuer "$EXPECTED_ISSUER" \
-            --bundle cosign-bundle.json \
             --output json \
             "$IMAGE_DIGEST" > cosign-verification.json
           jq -e 'length >= 1' cosign-verification.json > /dev/null
@@ -85,7 +84,6 @@ jobs:
           cosign verify \
             --certificate-identity "$wrong_identity" \
             --certificate-oidc-issuer "$EXPECTED_ISSUER" \
-            --bundle cosign-bundle.json \
             "$IMAGE_DIGEST" > negative-wrong-identity.log 2>&1
           status=$?
           set -e
