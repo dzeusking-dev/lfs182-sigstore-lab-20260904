@@ -60,7 +60,13 @@ jobs:
           echo "IMAGE_DIGEST=$IMAGE_REPOSITORY@$digest" >> "$GITHUB_ENV"
 
       - name: Keyless sign the exact digest and save the Sigstore bundle
-        run: cosign sign --yes --bundle cosign-bundle.json "$IMAGE_DIGEST"
+        run: >-
+          cosign sign
+          --yes
+          --upload=true
+          --registry-referrers-mode=legacy
+          --bundle cosign-bundle.json
+          "$IMAGE_DIGEST"
 
       - name: Verify the exact workflow identity, issuer, and transparency evidence
         shell: bash
