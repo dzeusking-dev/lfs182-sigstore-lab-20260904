@@ -59,14 +59,17 @@ jobs:
           echo "DIGEST=$digest" >> "$GITHUB_ENV"
           echo "IMAGE_DIGEST=$IMAGE_REPOSITORY@$digest" >> "$GITHUB_ENV"
 
-      - name: Keyless sign the exact digest and save the Sigstore bundle
-        run: >-
-          cosign sign
-          --yes
-          --upload=true
-          --registry-referrers-mode=legacy
-          --bundle cosign-bundle.json
-          "$IMAGE_DIGEST"
+      - name: Keyless sign the exact digest and capture the registry attachment
+        shell: bash
+        run: |
+          set -euo pipefail
+          cosign sign \
+            --yes \
+            --upload=true \
+            --registry-referrers-mode=legacy \
+            "$IMAGE_DIGEST"
+          cosign download signature "$IMAGE_DIGEST" > cosign-signature.json
+          jq -e 'length >= 1' cosign-signature.json > /dev/null
 
       - name: Verify the exact workflow identity, issuer, and transparency evidence
         shell: bash
@@ -129,7 +132,7 @@ jobs:
           path: |
             summary.txt
             push.log
-            cosign-bundle.json
+            cosign-signature.json
             cosign-verification.json
             negative-wrong-identity.log
             negative-altered-digest.log
